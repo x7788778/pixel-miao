@@ -14,11 +14,12 @@
 <body>
   <div id="app">
     <div class="canvas">
-      <canvas @click="drawDot" ref="canvas" :width="width" :height="height"></canvas>
+      <canvas @click="handleCanvasClick" ref="canvas" :width="width" :height="height"></canvas>
     </div>
+    <button @click="isPickingColor = true">{{isPickingColor ? '正在取色':'取色'}}</button>
     <input type="color" v-model="color">
-    <label :style="{color: c}" v-for="c of commonColors">
-      <input type="radio" :value="c" v-model="color"> {{c}}
+    <label :style="{color: c.name}" v-for="c of commonColors">
+      <input type="radio" :value="c.value" v-model="color"> {{c.name}}
     </label>
   </div>
 </body>
@@ -29,13 +30,54 @@
     data() {
       return {
         pixelData: [],
-        commonColors: ['red','orange','yellow','green','aqua','blue','purple','black','white'],
-        color: 'red',
+        commonColors: [{
+          name:'red',
+          value: '#ff0000',
+        },{
+          name:'yellow',
+          value: '#ffff00',
+        },{
+          name:'green',
+          value: '#008000',
+        },{
+          name:'blue',
+          value: '#0000ff',
+        },{
+          name:'black',
+          value: '#000000',
+        },{
+          name:'white',
+          value: '#ffffff',
+        }],
+        color: '#ff0000',
         width: 0,
         height: 0,
+        isPickingColor: false,
       }
     },
     methods: {
+      handleCanvasClick(e) {
+        if (this.isPickingColor) {
+          this.pickColor(e)
+        } else {
+          this.drawDot(e)
+        }
+      },
+      rgba2hex(dot) {
+        dot = Array.from(dot)
+        dot = dot.map(it => it.toString(16).padStart(2, '0'))
+        console.log(dot)
+        return '#' + dot[0] + dot[1] + dot[2]
+      },
+      pickColor(e) {
+        var x = e.layerX
+        var y = e.layerY
+        var p = this.ctx.getImageData(x,y,1,1).data
+        var hexColor = this.rgba2hex(p)
+        // console.log(p, hexColor)
+        this.color = hexColor
+        this.isPickingColor = false
+      },
       drawDot(e) {
         // debugger
         this.ws.send(JSON.stringify({
@@ -52,6 +94,7 @@
 
       var canvas = this.$refs.canvas
       var ctx = canvas.getContext('2d')
+      this.ctx = ctx
 
       ws.onmessage = ({data}) => {
         data = JSON.parse(data)
