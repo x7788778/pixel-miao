@@ -89,7 +89,7 @@
       }
     },
     mounted() {
-      var ws = new WebSocket('ws://localhost:9095/pixel')
+      var ws = new WebSocket(`ws://${location.host}/pixel`)
       this.ws = ws
 
       var canvas = this.$refs.canvas
