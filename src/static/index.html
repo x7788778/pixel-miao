@@ -93,6 +93,8 @@
       this.ws = ws
 
       var canvas = this.$refs.canvas
+      canvas.style.imageRendering = 'pixelated'
+
       var ctx = canvas.getContext('2d')
       this.ctx = ctx
 
