@@ -4,10 +4,20 @@
   <meta charset="UTF-8">
   <title>Pixel Painter</title>
   <style>
-    .canvas {
+    .canvas-wrapper {
       border: 2px solid;
       /*display: inline-block;*/
       width: max-content;
+      position: relative;
+      width: 256px;
+      height: 256px;
+      overflow: hidden;
+    }
+    canvas {
+      position: absolute;
+      box-shadow: 0 0 5px grey;
+      /*transform: scale(2);*/
+      transform-origin: top left;
     }
     .common-colors {
       background-color: #eee;
@@ -30,8 +40,8 @@
 </head>
 <body>
   <div id="app">
-    <div class="canvas">
-      <canvas @click="handleCanvasClick" ref="canvas" :width="width" :height="height"></canvas>
+    <div class="canvas-wrapper">
+      <canvas @mousedown="prepareDrag" ref="canvas" :width="width" :height="height" style="top:0px;left:0px"></canvas>
     </div>
     <button @click="startPickingColor">{{isPickingColor ? '正在取色':'取色'}}</button>
     <input type="color" v-model="color">
@@ -52,9 +62,47 @@
         width: 256,
         height: 256,
         isPickingColor: false,
+        zoomFactor: 1,
       }
     },
     methods: {
+      prepareDrag(e) {
+        console.log('prepareDrag')
+        var canvas = this.$refs.canvas
+        var startX = e.clientX
+        var startY = e.clientY
+        var posX = parseInt(canvas.style.left)
+        var posY = parseInt(canvas.style.top)
+        // console.log(posX,posY)
+        var moveHandler
+        var upHandler
+
+        var moved = false
+        canvas.addEventListener('mousemove', moveHandler = e => {
+          console.log('mousemove')
+          var currX = e.clientX
+          var currY = e.clientY
+          var diffX = currX - startX
+          var diffY = currY - startY
+          // console.log(diffX, diffY)
+          if (diffX > 2 && diffY > 2) {
+            moved = true
+          }
+          canvas.style.left = posX + diffX + 'px'
+          canvas.style.top = posY + diffY + 'px'
+        })
+
+        canvas.addEventListener('mouseup', upHander = e => {
+          canvas.removeEventListener('mousemove', moveHandler)
+          canvas.removeEventListener('mouseup', upHander)
+          if (!moved) {
+            this.handleCanvasClick(e)
+          }
+        })
+      },
+      zoom(e) {
+        console.log(e)
+      },
       makeCursorImgUrl(color) {
         var cursor = document.createElement('canvas')
         var ctx = cursor.getContext('2d')
@@ -122,15 +170,48 @@
       },
       drawDot(e) {
         // debugger
+        var clientX = e.clientX
+        var clientY = e.clientY
+        var rect = this.$refs.canvas.getBoundingClientRect()
+
+        var x = (clientX - rect.left) / this.zoomFactor
+        var y = (clientY - rect.top) / this.zoomFactor
+
+        console.log('drawdot', x, y)
         this.ws.send(JSON.stringify({
           type: 'drawDot',
-          x: e.layerX,
-          y: e.layerY,
+          x: parseInt(x),//e.offsetX,
+          y: parseInt(y),//e.offsetY,
           color: this.color,
         }))
+      },
+      initZoom() {
+        console.log('init zoom')
+        var canvas = this.$refs.canvas
+        this.$refs.canvas.parentNode.addEventListener('mousewheel', (e) => {
+          console.log(e)
+          e.preventDefault()
+          if (e.deltaY < 0) {
+            this.zoomFactor = this.zoomFactor * 1.25
+          } else {
+            this.zoomFactor = this.zoomFactor * 0.8
+          }
+          if (this.zoomFactor < 1) {
+            this.zoomFactor = 1
+          }
+          if (this.zoomFactor > 40) {
+            this.zoomFactor = this.zoomFactor * 0.8
+          }
+          if (this.zoomFactor == 1) {
+            canvas.style.left = '0px'
+            canvas.style.top = '0px'
+          }
+          canvas.style.transform = `scale(${this.zoomFactor})`
+        })
       }
     },
     mounted() {
+      this.initZoom()
       var ws = new WebSocket(`ws://${location.host}/pixel`)
       this.ws = ws
 
