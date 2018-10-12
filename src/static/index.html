@@ -43,6 +43,7 @@
     <div class="canvas-wrapper">
       <canvas @mousedown="prepareDrag" ref="canvas" :width="width" :height="height" style="top:0px;left:0px"></canvas>
     </div>
+    <div>在线人数：{{onlineCount}}</div>
     <button @click="startPickingColor">{{isPickingColor ? '正在取色':'取色'}}</button>
     <input type="color" v-model="color">
     <div class="common-colors">
@@ -63,6 +64,7 @@
         height: 256,
         isPickingColor: false,
         zoomFactor: 1,
+        onlineCount: 0,
       }
     },
     methods: {
@@ -237,6 +239,8 @@
           if (data.type == 'updateDot') {
             ctx.fillStyle = data.color
             ctx.fillRect(data.x, data.y, 1, 1)
+          } else if (data.type = 'onlineCount') {
+            this.onlineCount = data.count
           }
         } 
       }

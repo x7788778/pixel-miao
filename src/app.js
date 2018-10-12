@@ -45,6 +45,22 @@ async function main() {
     })
     
 
+    wss.clients.forEach(ws => {
+      ws.send(JSON.stringify({
+        type: 'onlineCount',
+        count: wss.clients.size,
+      }))
+    })
+
+    ws.on('close', () => {
+      wss.clients.forEach(ws => {
+        ws.send(JSON.stringify({
+          type: 'onlineCount',
+          count: wss.clients.size,
+        }))
+      })
+    })
+
     var lastDraw = 0
 
     ws.on('message', msg => {
