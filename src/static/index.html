@@ -9,6 +9,23 @@
       /*display: inline-block;*/
       width: max-content;
     }
+    .common-colors {
+      background-color: #eee;
+      padding: 3px;
+    }
+    .color-card {
+      width: 22px;
+      height: 22px;
+      background-color: currentColor;
+      border-radius: 3px;
+      display: inline-block;
+      margin: 5px;
+      vertical-align: bottom;
+    }
+    .color-card.active {
+      border: 2px solid;
+      margin: 3px;
+    }
   </style>
 </head>
 <body>
@@ -18,9 +35,9 @@
     </div>
     <button @click="isPickingColor = true">{{isPickingColor ? '正在取色':'取色'}}</button>
     <input type="color" v-model="color">
-    <label :style="{color: c.name}" v-for="c of commonColors">
-      <input type="radio" :value="c.value" v-model="color"> {{c.name}}
-    </label>
+    <div class="common-colors">
+      <span v-for="c of commonColors" @click="color=c" :class="{'color-card':true,active:c==color}" :style="{color:c}"></span>
+    </div>
   </div>
 </body>
 <script src="vue-2.5.17.js"></script>
@@ -30,25 +47,7 @@
     data() {
       return {
         pixelData: [],
-        commonColors: [{
-          name:'red',
-          value: '#ff0000',
-        },{
-          name:'yellow',
-          value: '#ffff00',
-        },{
-          name:'green',
-          value: '#008000',
-        },{
-          name:'blue',
-          value: '#0000ff',
-        },{
-          name:'black',
-          value: '#000000',
-        },{
-          name:'white',
-          value: '#ffffff',
-        }],
+        commonColors: ["#000000", "#ffffff", "#aaaaaa", "#555555", "#fed3c7", "#ffc4ce", "#faac8e", "#ff8b83", "#f44336", "#e91e63", "#e2669e", "#9c27b0", "#673ab7", "#3f51b5", "#004670", "#057197", "#2196f3", "#00bcd4", "#3be5db", "#97fddc", "#167300", "#37a93c", "#89e642", "#d7ff07", "#fff6d1", "#f8cb8c", "#ffeb3b", "#ffc107", "#ff9800", "#ff5722", "#b83f27", "#795548"],
         color: '#ff0000',
         width: 256,
         height: 256,
