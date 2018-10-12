@@ -25,10 +25,14 @@ async function main() {
     img = new Jimp(256, 256, 0xffffffff)
   }
 
+  var lastUpdate = 0
   setInterval(() => {
-    img.write(path.join(__dirname, './pixel.png'), () => {
-      console.log('data saved!')
-    })
+    var now = Date.now()
+    if (now - lastUpdate < 3000) {
+      img.write(path.join(__dirname, './pixel.png'), () => {
+        console.log('data saved!', now)
+      })
+    }
   }, 3000)
 
   wss.on('connection', (ws, req) => {
@@ -54,6 +58,7 @@ async function main() {
         }
         if (x >= 0 && y >= 0 && x < width && y < height) {
           lastDraw = now
+          lastUpdate = now
           img.setPixelColor(Jimp.cssColorToHex(color), x, y)
           wss.clients.forEach(client => {
             client.send(JSON.stringify({
