@@ -146,10 +146,9 @@
           this.drawDot(e)
         }
       },
-      rgba2hex(dot) {
+      rgba2hex(dot) {//dot是四个元素的Uint8Array
         dot = Array.from(dot)
         dot = dot.map(it => it.toString(16).padStart(2, '0'))
-        console.log(dot)
         return '#' + dot[0] + dot[1] + dot[2]
       },
       updateCursor(e) {
