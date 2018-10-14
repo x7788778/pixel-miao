@@ -41,8 +41,10 @@ async function main() {
   let userOperations = []
 
   setInterval(() => {
-    io.emit('updateDot', userOperations)
-    userOperations = []
+    if (userOperations.length) {
+      io.emit('updateDot', userOperations)
+      userOperations = []
+    }
   }, 300)
 
   io.on('connection', (ws, req) => {
