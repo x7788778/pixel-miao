@@ -12,8 +12,8 @@ const app = express()
 const server = http.createServer(app)
 const io = socketIO(server)
 
-const width = 256
-const height = 256
+const width = 1000
+const height = 1000
 
 main()
 
@@ -23,7 +23,7 @@ async function main() {
   try {
     img = await Jimp.read(path.join(__dirname, './pixel.png'))
   } catch(e) {
-    img = new Jimp(256, 256, 0xffffffff)
+    img = new Jimp(1000, 1000, 0xffffffff)
   }
 
   var lastUpdate = 0
