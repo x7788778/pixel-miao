@@ -40,7 +40,7 @@
 </head>
 <body>
   <div id="app">
-    <div class="canvas-wrapper">
+    <div @mousewheel="handleZoom" class="canvas-wrapper">
       <canvas @mousedown="prepareDrag" ref="canvas" :width="width" :height="height" style="top:0px;left:0px"></canvas>
     </div>
     <div>在线人数：{{onlineCount}}</div>
@@ -191,33 +191,28 @@
           color: this.color,
         }))
       },
-      initZoom() {
-        console.log('init zoom')
+      handleZoom(e) {
         var canvas = this.$refs.canvas
-        this.$refs.canvas.parentNode.addEventListener('mousewheel', (e) => {
-          console.log(e)
-          e.preventDefault()
-          if (e.deltaY < 0) {
-            this.zoomFactor = this.zoomFactor * 1.25
-          } else {
-            this.zoomFactor = this.zoomFactor * 0.8
-          }
-          if (this.zoomFactor < 1) {
-            this.zoomFactor = 1
-          }
-          if (this.zoomFactor > 40) {
-            this.zoomFactor = this.zoomFactor * 0.8
-          }
-          if (this.zoomFactor == 1) {
-            canvas.style.left = '0px'
-            canvas.style.top = '0px'
-          }
-          canvas.style.transform = `scale(${this.zoomFactor})`
-        })
+        e.preventDefault()
+        if (e.deltaY < 0) {
+          this.zoomFactor = this.zoomFactor * 1.25
+        } else {
+          this.zoomFactor = this.zoomFactor * 0.8
+        }
+        if (this.zoomFactor < 1) {
+          this.zoomFactor = 1
+        }
+        if (this.zoomFactor > 40) {
+          this.zoomFactor = this.zoomFactor * 0.8
+        }
+        if (this.zoomFactor == 1) {
+          canvas.style.left = '0px'
+          canvas.style.top = '0px'
+        }
+        canvas.style.transform = `scale(${this.zoomFactor})`      
       }
     },
     mounted() {
-      this.initZoom()
       var ws = new WebSocket(`ws://${location.host}/pixel`)
       this.ws = ws
 
