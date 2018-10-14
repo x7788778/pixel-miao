@@ -91,7 +91,7 @@
           canvas.style.top = posY + diffY + 'px'
         })
 
-        canvas.addEventListener('mouseup', upHander = e => {
+        canvas.addEventListener('mouseup', upHandler = e => {
           var currX = e.clientX
           var currY = e.clientY
           var diffX = currX - startX
@@ -101,7 +101,7 @@
             moved = true
           }
           canvas.removeEventListener('mousemove', moveHandler)
-          canvas.removeEventListener('mouseup', upHander)
+          canvas.removeEventListener('mouseup', upHandler)
           if (!moved) {
             this.handleCanvasClick(e)
           }
