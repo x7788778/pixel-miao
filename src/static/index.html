@@ -86,15 +86,19 @@
           var currY = e.clientY
           var diffX = currX - startX
           var diffY = currY - startY
-          // console.log(diffX, diffY)
-          if (diffX > 2 && diffY > 2) {
-            moved = true
-          }
           canvas.style.left = posX + diffX + 'px'
           canvas.style.top = posY + diffY + 'px'
         })
 
         canvas.addEventListener('mouseup', upHander = e => {
+          var currX = e.clientX
+          var currY = e.clientY
+          var diffX = currX - startX
+          var diffY = currY - startY
+          console.log('mouseup', diffX,diffY)
+          if (Math.sqrt(diffX ** 2 + diffY**2) > 3) {
+            moved = true
+          }
           canvas.removeEventListener('mousemove', moveHandler)
           canvas.removeEventListener('mouseup', upHander)
           if (!moved) {
