@@ -2,6 +2,7 @@ const http = require('http')
 const fs = require('fs')
 const path = require('path')
 const ws = require('ws')
+const socketIO = require('socket.io')
 const express = require('express')
 const Jimp = require('jimp')
 
@@ -9,7 +10,7 @@ const port = 9095
 
 const app = express()
 const server = http.createServer(app)
-const wss = new ws.Server({server})
+const io = socketIO(server)
 
 const width = 256
 const height = 256
@@ -35,54 +36,51 @@ async function main() {
     }
   }, 3000)
 
-  wss.on('connection', (ws, req) => {
+  global.io = io
+
+  let userOperations = []
+
+  setInterval(() => {
+    io.emit('updateDot', userOperations)
+    userOperations = []
+  }, 300)
+
+  io.on('connection', (ws, req) => {
     img.getBuffer(Jimp.MIME_PNG, (err, buf) => {
       if (err) {
         console.log('get buffer err', err)
       } else {
-        ws.send(buf)
+        ws.emit('init', buf)
       }
     })
-    
 
-    wss.clients.forEach(ws => {
-      ws.send(JSON.stringify({
-        type: 'onlineCount',
-        count: wss.clients.size,
-      }))
+    io.emit('onlineCount', {
+      count: Object.keys(io.sockets.sockets).length,
     })
 
     ws.on('close', () => {
-      wss.clients.forEach(ws => {
-        ws.send(JSON.stringify({
-          type: 'onlineCount',
-          count: wss.clients.size,
-        }))
+      io.emit('onlineCount', {
+        count: Object.keys(io.sockets.sockets).length,
       })
     })
 
     var lastDraw = 0
 
-    ws.on('message', msg => {
-      msg = JSON.parse(msg)
+    ws.on('drawDot', data => {
       var now = Date.now()
-      var {x, y, color} = msg
+      var {x, y, color} = data
 
-      if (msg.type == 'drawDot') {
-        if (now - lastDraw < 200) {
-          return
-        }
-        if (x >= 0 && y >= 0 && x < width && y < height) {
-          lastDraw = now
-          lastUpdate = now
-          img.setPixelColor(Jimp.cssColorToHex(color), x, y)
-          wss.clients.forEach(client => {
-            client.send(JSON.stringify({
-              type: 'updateDot',
-              x, y, color
-            }))
-          })
-        }
+      if (now - lastDraw < 200) {
+        return
+      }
+      if (x >= 0 && y >= 0 && x < width && y < height) {
+        lastDraw = now
+        lastUpdate = now
+        img.setPixelColor(Jimp.cssColorToHex(color), x, y)
+        // io.emit('updateDot', {
+        //   x, y, color
+        // })
+        userOperations.push({x,y,color})
       }
     })
   })
