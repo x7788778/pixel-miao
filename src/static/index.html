@@ -162,9 +162,8 @@
         this.$refs.canvas.addEventListener('mousemove', this.updateCursor)
       },
       getCurrHoverColor(e) {
-        var x = e.offsetX
-        var y = e.offsetY
-        var p = this.ctx.getImageData(x,y,1,1).data
+        var {x, y} = this.getMousePosition(e)
+        var p = this.ctx.getImageData(x,y,1,1).data//这里返回的是一个Uint8Array分别代表r，g，b，a；需要转换为css颜色
         var hexColor = this.rgba2hex(p)
         return hexColor
       },
@@ -175,8 +174,17 @@
         this.$refs.canvas.removeEventListener('mousemove', this.updateCursor)
         this.$refs.canvas.style.cursor = ''
       },
-      drawDot(e) {
-        // debugger
+      /**
+       * 通过一个鼠标事件对象获取鼠标点击的画布中的像素的坐标
+       * 注意返回的是画布中像素的位置，而非鼠标点击的css位置
+       * 即与画面的放大无关，且总是返回整数
+       *
+       * 全都使用相对于视口的尺寸计算
+       * 
+       * @param  {MouseEvent} e 事件对象
+       * @return {Object}       坐标对象
+       */
+      getMousePosition(e) {
         var clientX = e.clientX
         var clientY = e.clientY
         var rect = this.$refs.canvas.getBoundingClientRect()
@@ -186,9 +194,13 @@
 
         x = parseInt(x)
         y = parseInt(y)
+        return {x, y}
+      },
+      drawDot(e) {
+        var {x, y} = this.getMousePosition(e)
         this.ws.emit('drawDot', {
-          x: x,//e.offsetX,
-          y: y,//e.offsetY,
+          x,
+          y,
           color: this.color,
         })
 
