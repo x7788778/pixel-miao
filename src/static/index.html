@@ -207,24 +207,61 @@
         this.ctx.fillStyle = this.color
         this.ctx.fillRect(x, y, 1, 1)
       },
+      /**
+       * 返回鼠标相对于画布的css位置，为了放大使用
+       * 非画布像素位置，与画布像素无关
+       * @param  {[type]} e [description]
+       * @return {[type]}   [description]
+       */
+      getMouseRelativePosition(e, el) {
+        var clientX = e.clientX
+        var clientY = e.clientY
+        var rect = this.$refs.canvas.getBoundingClientRect()
+
+        var x = clientX - rect.left
+        var y = clientY - rect.top
+        return {x, y}
+      },
       handleZoom(e) {
-        var canvas = this.$refs.canvas
         e.preventDefault()
+        var canvas = this.$refs.canvas
+
+        var prevFactor = this.zoomFactor
+
         if (e.deltaY < 0) {
           this.zoomFactor = this.zoomFactor * 1.25
         } else {
           this.zoomFactor = this.zoomFactor * 0.8
         }
+
         if (this.zoomFactor < 1) {
           this.zoomFactor = 1
         }
         if (this.zoomFactor > 40) {
           this.zoomFactor = this.zoomFactor * 0.8
         }
-        if (this.zoomFactor == 1) {
+
+        if (this.zoomFactor === 1) {
           canvas.style.left = '0px'
           canvas.style.top = '0px'
         }
+
+
+        var ratio = this.zoomFactor / prevFactor
+        var {x, y} = this.getMouseRelativePosition(e, canvas)
+        // var {wrpX, wrpY} = this.getMouseRelativePosition(e, canvasWrapper)
+        var posLeft = parseInt(canvas.style.left)
+        var posTop = parseInt(canvas.style.top)
+
+        var tx = x * ratio
+        var ty = y * ratio
+        var dx = tx - x
+        var dy = ty - y
+        posLeft = posLeft - dx
+        posTop = posTop - dy
+        canvas.style.left = posLeft + 'px'
+        canvas.style.top = posTop + 'px'
+        
         canvas.style.transform = `scale(${this.zoomFactor})`      
       }
     },
