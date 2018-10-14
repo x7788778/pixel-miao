@@ -29,12 +29,12 @@ async function main() {
   var lastUpdate = 0
   setInterval(() => {
     var now = Date.now()
-    if (now - lastUpdate < 3000) {
+    if (now - lastUpdate < 5000) {
       img.write(path.join(__dirname, './pixel.png'), () => {
         console.log('data saved!', now)
       })
     }
-  }, 3000)
+  }, 5000)
 
   global.io = io
 
@@ -45,7 +45,7 @@ async function main() {
       io.emit('updateDot', userOperations)
       userOperations = []
     }
-  }, 300)
+  }, 500)
 
   io.on('connection', (ws, req) => {
     img.getBuffer(Jimp.MIME_PNG, (err, buf) => {
