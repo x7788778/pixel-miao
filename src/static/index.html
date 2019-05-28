@@ -140,6 +140,7 @@
         return cursor.toDataURL()
       },
       handleCanvasClick(e) {
+        console.log('handler click', e.offsetX,e.offsetY, e.layerX, e.layerY)
         if (this.isPickingColor) {
           this.pickColor(e)
         } else {
